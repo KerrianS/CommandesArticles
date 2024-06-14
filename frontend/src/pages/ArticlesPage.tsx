@@ -1,74 +1,72 @@
 import React, { useEffect, useState } from 'react';
-import TableComponent from '../components/TableComponent';
 import SearchBarComponent from '../components/SearchBarComponent';
+import TableComponent from '../components/TableComponent';
 import CardComponent from '../components/CardComponent';
-import { FaInfoCircle } from 'react-icons/fa';
+import TableLevelComponent from '../components/TableLevelComponent'; // Import du composant TableLevelComponent
+import { useParams } from 'react-router-dom';
 
 interface ArticlesPageProps {
   backgroundColor?: string;
 }
 
 const ArticlesPages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
-  const [data, setData] = useState<any[]>([]);
-  const [additionalData, setAdditionalData] = useState<any[]>([]);
-  const [clickedRowIndex, setClickedRowIndex] = useState<number | null>(null);
-  const [showDetails, setShowDetails] = useState<boolean>(false);
-
-  const columns = [
-    { id: 'id', label: 'N°' },
-    { id: 'name', label: 'NOM' },
-    { id: 'description', label: 'DESCRIPTION' },
-  ];
+  const { id } = useParams(); // Récupère l'ID de l'article depuis l'URL
+  const [data, setData] = useState<any>({});
+  const [levelOne, setLevelOne] = useState<any[]>([]); // Modifiez le type en any[]
+  const [levelTwo, setLevelTwo] = useState<any[]>([]); // Modifiez le type en any[]
+  const [levelThree, setLevelThree] = useState<any[]>([]); // Modifiez le type en any[]
 
   useEffect(() => {
     // Fetch main data
-    fetch('https://api.example.com/data')
-      .then(response => response.json())
-      .then(data => setData(data))
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
-
-  const handleIconClick = (rowData: any) => {
-    console.log('Clicked on info icon for row:', rowData);
-    const rowIndex = data.findIndex(item => item.id === rowData.id);
-    setClickedRowIndex(rowIndex);
-    
-    // Fetch additional data based on the clicked row
-    fetch(`https://api.example.com/data/${rowData.id}/components`)
+    fetch(`http://10.10.30.100:3031/article/${id}`)
       .then(response => response.json())
       .then(data => {
-        setAdditionalData(data);
-        setShowDetails(true);
+        setData(data);
+        // Assurez-vous que les données existent avant de les traiter
+        if (Array.isArray(data.level_one)) {
+          setLevelOne(data.level_one);
+        } else if (data.level_one) {
+          setLevelOne([data.level_one]);
+        }
+        if (Array.isArray(data.level_two)) {
+          setLevelTwo(data.level_two);
+        } else if (data.level_two) {
+          setLevelTwo([data.level_two]);
+        }
+        if (Array.isArray(data.level_three)) {
+          setLevelThree(data.level_three);
+        } else if (data.level_three) {
+          setLevelThree([data.level_three]);
+        }
       })
-      .catch(error => console.error('Error fetching additional data:', error));
-  };
+      .catch(error => console.error('Error fetching data:', error));
+  }, [id]);
 
   return (
     <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh', padding: '20px', boxSizing: 'border-box' }}>
       <br />
-      <SearchBarComponent />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px' }}>
-        <div>
-          <TableComponent 
-            data={data} 
-            columns={columns}
-            actionColumn={{
-              label: 'DETAILS',
-              onClick: handleIconClick,
-              icon: <FaInfoCircle />,
-            }}
-          />
-        </div>
-        {clickedRowIndex !== null && showDetails && (
-          <div style={{ maxWidth: '400px' }}>
-            <CardComponent backgroundColor={backgroundColor || 'white'}>
-              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                <h2>Composants "{data[clickedRowIndex].name}"</h2>
-              </div>
-              <TableComponent 
-                data={additionalData} 
-                columns={columns}
-              />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', columnGap: '20px' }}>
+        {levelOne.length > 0 && (
+          <div>
+            <h2>Composants niveau 1</h2>
+            <CardComponent>
+              <TableLevelComponent data={levelOne} />
+            </CardComponent>
+          </div>
+        )}
+        {levelTwo.length > 0 && (
+          <div>
+            <h2>Composants niveau 2</h2>
+            <CardComponent>
+              <TableLevelComponent data={levelTwo} />
+            </CardComponent>
+          </div>
+        )}
+        {levelThree.length > 0 && (
+          <div>
+            <h2>Composants niveau 3</h2>
+            <CardComponent>
+              <TableLevelComponent data={levelThree} />
             </CardComponent>
           </div>
         )}

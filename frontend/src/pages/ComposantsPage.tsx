@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import TableComponent from '../components/TableComponent';
 import SearchBarComponent from '../components/SearchBarComponent';
 import CardComponent from '../components/CardComponent';
@@ -9,10 +10,13 @@ interface ComposantsPageProps {
 }
 
 const ComposantsPage: React.FC<ComposantsPageProps> = ({ backgroundColor }) => {
+  const { articleId } = useParams<{ articleId: string }>();
   const [data, setData] = useState<any[]>([]);
-  const [additionalData, setAdditionalData] = useState<any[]>([]);
-  const [clickedRowIndex, setClickedRowIndex] = useState<number | null>(null);
-  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [n1Data, setN1Data] = useState<any[]>([]);
+  const [n2Data, setN2Data] = useState<any[]>([]);
+  const [n3Data, setN3Data] = useState<any[]>([]);
+  const [showN2, setShowN2] = useState<boolean>(false);
+  const [showN3, setShowN3] = useState<boolean>(false);
 
   const columns = [
     { id: 'id', label: 'N°' },
@@ -21,56 +25,66 @@ const ComposantsPage: React.FC<ComposantsPageProps> = ({ backgroundColor }) => {
   ];
 
   useEffect(() => {
-    // Fetch main data
-    fetch('https://api.example.com/data')
+    fetch(`https://api.example.com/data/${articleId}/components`)
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error fetching data:', error));
-  }, []);
+  }, [articleId]);
 
-  const handleIconClick = (rowData: any) => {
-    console.log('Clicked on info icon for row:', rowData);
-    const rowIndex = data.findIndex(item => item.id === rowData.id);
-    setClickedRowIndex(rowIndex);
-    
-    // Fetch additional data based on the clicked row
-    fetch(`https://api.example.com/data/${rowData.id}/components`)
+  const fetchNestedData = (id: number, setDataCallback: React.Dispatch<React.SetStateAction<any[]>>, setShowCallback: React.Dispatch<React.SetStateAction<boolean>>) => {
+    fetch(`https://api.example.com/data/${id}/components`)
       .then(response => response.json())
       .then(data => {
-        setAdditionalData(data);
-        setShowDetails(true);
+        setDataCallback(data);
+        setShowCallback(true);
       })
-      .catch(error => console.error('Error fetching additional data:', error));
+      .catch(error => console.error('Error fetching nested data:', error));
   };
 
   return (
     <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh', padding: '20px', boxSizing: 'border-box' }}>
       <br />
-      <SearchBarComponent />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px' }}>
-        <div>
-          <TableComponent 
-            data={data} 
-            columns={columns}
-            actionColumn={{
-              label: 'DETAILS',
-              onClick: handleIconClick,
-              icon: <FaInfoCircle />,
-            }}
-          />
-        </div>
-        {clickedRowIndex !== null && showDetails && (
-          <div style={{ maxWidth: '400px' }}>
-            <CardComponent backgroundColor={backgroundColor || 'white'}>
-              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                <h2>Composants "{data[clickedRowIndex].name}"</h2>
-              </div>
-              <TableComponent 
-                data={additionalData} 
-                columns={columns}
-              />
-            </CardComponent>
-          </div>
+      <div>
+        <TableComponent 
+          data={data} 
+          columns={columns}
+          actionColumn={{
+            label: 'N1',
+            onClick: (rowData) => fetchNestedData(rowData.id, setN1Data, () => setShowN2(false)),
+            icon: <FaInfoCircle />,
+          }}
+        />
+        {showN2 && (
+          <CardComponent backgroundColor={backgroundColor || 'white'}>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2>Composants de N1</h2>
+            </div>
+            <TableComponent 
+              data={n1Data} 
+              columns={columns}
+              actionColumn={{
+                label: 'N2',
+                onClick: (rowData) => fetchNestedData(rowData.id, setN2Data, () => setShowN3(false)),
+                icon: <FaInfoCircle />,
+              }}
+            />
+          </CardComponent>
+        )}
+        {showN3 && (
+          <CardComponent backgroundColor={backgroundColor || 'white'}>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2>Composants de N2</h2>
+            </div>
+            <TableComponent 
+              data={n2Data} 
+              columns={columns}
+              actionColumn={{
+                label: 'N3',
+                onClick: (rowData) => fetchNestedData(rowData.id, setN3Data, () => {}),
+                icon: <FaInfoCircle />,
+              }}
+            />
+          </CardComponent>
         )}
       </div>
     </div>
