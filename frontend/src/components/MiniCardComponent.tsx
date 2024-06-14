@@ -8,13 +8,12 @@ interface MiniCardComponentProps {
 }
 
 const MiniCardComponent: React.FC<MiniCardComponentProps> = ({ text, backgroundColor }) => {
-  // Définir la couleur de fond par défaut si non spécifiée
   const defaultBackgroundColor = backgroundColor || (() => {
     switch (text) {
-      case 'EN COURS':
-        return '#E5E500';
-      case 'TERMINE':
-        return '#ADFF2F';
+      case 'Disponible':
+        return '#32CD32';
+      case 'Indisponible':
+        return '#8B0000';
       default:
         return 'white';
     }

@@ -1,8 +1,9 @@
+// ArticlesPages.tsx
+
 import React, { useEffect, useState } from 'react';
 import SearchBarComponent from '../components/SearchBarComponent';
-import TableComponent from '../components/TableComponent';
 import CardComponent from '../components/CardComponent';
-import TableLevelComponent from '../components/TableLevelComponent'; // Import du composant TableLevelComponent
+import TableComponent from '../components/TableComponent';
 import { useParams } from 'react-router-dom';
 
 interface ArticlesPageProps {
@@ -10,11 +11,11 @@ interface ArticlesPageProps {
 }
 
 const ArticlesPages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
-  const { id } = useParams(); // Récupère l'ID de l'article depuis l'URL
+  const { id } = useParams(); 
   const [data, setData] = useState<any>({});
-  const [levelOne, setLevelOne] = useState<any[]>([]); // Modifiez le type en any[]
-  const [levelTwo, setLevelTwo] = useState<any[]>([]); // Modifiez le type en any[]
-  const [levelThree, setLevelThree] = useState<any[]>([]); // Modifiez le type en any[]
+  const [levelOne, setLevelOne] = useState<any[]>([]); 
+  const [levelTwo, setLevelTwo] = useState<any[]>([]); 
+  const [levelThree, setLevelThree] = useState<any[]>([]); 
 
   useEffect(() => {
     // Fetch main data
@@ -22,7 +23,6 @@ const ArticlesPages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
       .then(response => response.json())
       .then(data => {
         setData(data);
-        // Assurez-vous que les données existent avant de les traiter
         if (Array.isArray(data.level_one)) {
           setLevelOne(data.level_one);
         } else if (data.level_one) {
@@ -42,34 +42,43 @@ const ArticlesPages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
       .catch(error => console.error('Error fetching data:', error));
   }, [id]);
 
+  const columns = [
+    { id: 'composant', label: 'Composant' },
+    { id: 'quantity', label: 'Quantité' },
+    { id: 'stock', label: 'Stock' }
+  ];
+
+  const defaultQuantity = 0;
+  const defaultStock = 0;
+
   return (
     <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh', padding: '20px', boxSizing: 'border-box' }}>
       <br />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', columnGap: '20px' }}>
-        {levelOne.length > 0 && (
-          <div>
-            <h2>Composants niveau 1</h2>
-            <CardComponent>
-              <TableLevelComponent data={levelOne} />
-            </CardComponent>
-          </div>
-        )}
-        {levelTwo.length > 0 && (
-          <div>
-            <h2>Composants niveau 2</h2>
-            <CardComponent>
-              <TableLevelComponent data={levelTwo} />
-            </CardComponent>
-          </div>
-        )}
-        {levelThree.length > 0 && (
-          <div>
-            <h2>Composants niveau 3</h2>
-            <CardComponent>
-              <TableLevelComponent data={levelThree} />
-            </CardComponent>
-          </div>
-        )}
+        <div>
+          <CardComponent>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2>Niveau 1</h2>
+            </div>
+            <TableComponent data={levelOne.map(item => ({ ...item, quantity: item.quantity || defaultQuantity, stock: item.stock || defaultStock }))} columns={columns} />
+          </CardComponent>
+        </div>
+        <div>
+          <CardComponent>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2>Niveau 2</h2>
+            </div>
+            <TableComponent data={levelTwo.map(item => ({ ...item, quantity: item.quantity || defaultQuantity, stock: item.stock || defaultStock }))} columns={columns} />
+          </CardComponent>
+        </div>
+        <div>
+          <CardComponent>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h2>Niveau 3</h2>
+            </div>
+            <TableComponent data={levelThree.map(item => ({ ...item, quantity: item.quantity || defaultQuantity, stock: item.stock || defaultStock }))} columns={columns} />
+          </CardComponent>
+        </div>
       </div>
     </div>
   );

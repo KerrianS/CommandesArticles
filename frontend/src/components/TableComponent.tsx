@@ -1,6 +1,7 @@
 // src/components/TableComponent.tsx
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import MiniCardComponent from './MiniCardComponent'; // Import du composant MiniCardComponent
 
 interface Column {
   id: string;
@@ -16,42 +17,51 @@ interface ActionColumn {
 interface TableComponentProps {
   data: any[]; 
   columns: Column[];
-  actionColumn?: ActionColumn; // Ajout d'une colonne d'action optionnelle
+  actionColumn?: ActionColumn; 
+  cellStyle?: React.CSSProperties; 
 }
 
-const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionColumn }) => {
+const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionColumn, cellStyle }) => {
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell key={column.id}>{column.label}</TableCell>
-            ))}
-            {actionColumn && ( // Vérifier si une colonne d'action est fournie
-              <TableCell>{actionColumn.label}</TableCell>
-            )}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+    <div style={{ overflowX: 'auto', paddingRight: '5px' }}> {/* Ajout de paddingRight */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead style={{ backgroundColor: '#f5f5f5' }}> 
+            <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.id}>{row[column.id]}</TableCell>
+                <TableCell key={column.id} style={{ fontWeight: 'bold', textAlign: 'center' }}>{column.label}</TableCell>
               ))}
-              {actionColumn && ( // Afficher la colonne d'action si elle est fournie
-                <TableCell>
-                  <IconButton aria-label="detail" onClick={() => actionColumn.onClick(row)}>
-                    {actionColumn.icon}
-                  </IconButton>
-                </TableCell>
+              {actionColumn && (
+                <TableCell style={{ fontWeight: 'bold', textAlign: 'center' }}>{actionColumn.label}</TableCell>
               )}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {data.map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {columns.map((column) => (
+                  <TableCell key={column.id} style={{ ...cellStyle, textAlign: 'center' }}>
+                    {column.id === 'etat' ? ( // Si c'est la colonne "ETAT"
+                      <MiniCardComponent text={row[column.id]} /> // Utilise MiniCardComponent pour afficher le texte
+                    ) : (
+                      row[column.id]
+                    )}
+                  </TableCell>
+                ))}
+                {actionColumn && (
+                  <TableCell style={{ textAlign: 'center' }}>
+                    <IconButton aria-label="detail" onClick={() => actionColumn.onClick(row)}>
+                      {actionColumn.icon}
+                    </IconButton>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 }
 
