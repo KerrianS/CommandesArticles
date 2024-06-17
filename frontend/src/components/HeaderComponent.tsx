@@ -38,9 +38,6 @@ function HeaderComponent() {
               <Button sx={{ color: 'white', display: 'block' }}>Commandes</Button>
             </Box>
             
-            <Box sx={{ ml: 3 }}>
-              <Button sx={{ color: 'white', display: 'block' }}>Stocks</Button>
-            </Box>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>

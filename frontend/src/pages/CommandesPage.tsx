@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, InputAdornment } from '@mui/material';
+import { TextField, InputAdornment, CircularProgress, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TableComponent from '../components/TableComponent';
 import CardComponent from '../components/CardComponent';
@@ -17,13 +17,16 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
   const [clickedRowIndex, setClickedRowIndex] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [loadingMainData, setLoadingMainData] = useState<boolean>(true);
+  const [loadingAdditionalData, setLoadingAdditionalData] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const columns = [
-    { id: 'etat', label: 'ETAT' },
+    { id: 'etat', label: 'Etat' },
     { id: 'DO_Piece', label: 'N° de commande' },
     { id: 'DO_Ref', label: 'Référence' },
     { id: 'DO_Tiers', label: 'Tiers' },
+    { id: 'probleme', label: 'Problème', render: (row: any) => <strong>{row.probleme}</strong> }
   ];
 
   const additionalColumns = [
@@ -33,46 +36,55 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
 
   useEffect(() => {
     // Fetch main data
-    fetch('http://10.10.30.100:3031/commande')
+    fetch('http://10.15.81.2:3039/commande/etat')
       .then(response => response.json())
       .then(data => {
         setData(data);
+        setLoadingMainData(false); // Arrêter le loader une fois que les données principales sont chargées
       })
-      .catch(error => console.error('Error fetching data:', error));
+      .catch(error => {
+        console.error('Error fetching main data:', error);
+        setLoadingMainData(false); // En cas d'erreur, arrêter le loader
+      });
   }, []);
 
   const handleIconClick = (rowData: any) => {
     const rowIndex = data.findIndex(item => item.DO_Piece === rowData.DO_Piece);
     setClickedRowIndex(rowIndex);
+    setLoadingAdditionalData(true); // Afficher le loader pendant la récupération des données supplémentaires
 
-    fetch(`http://10.10.30.100:3031/commande/${rowData.DO_Piece}`)
+    fetch(`http://10.15.81.2:3039/commande/${rowData.DO_Piece}`)
       .then(response => response.json())
       .then(data => {
         setAdditionalData(data);
         setShowDetails(true);
+        setLoadingAdditionalData(false); // Arrêter le loader une fois les données supplémentaires chargées
       })
-      .catch(error => console.error('Error fetching additional data:', error));
+      .catch(error => {
+        console.error('Error fetching additional data:', error);
+        setLoadingAdditionalData(false); // En cas d'erreur, arrêter le loader
+      });
   };
 
   const handleAdditionalIconClick = (rowData: any) => {
-    navigate(`/articles/${rowData.AR_Ref}`);
+    navigate(`/articles/${rowData.AR_Ref}`); // Utilisation de backticks
   };
 
   const filteredData = data.filter(item =>
     item.DO_Piece.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Fonction pour déterminer l'état en fonction des données
   const determineEtat = (item: any): string => {
-    // Mettez ici votre logique pour déterminer l'état
-    // Par exemple, si l'état est disponible lorsque DO_Tiers est non vide
-    return item.DO_Tiers ? 'Disponible' : 'Indisponible';
+    if (!item.DO_Tiers) {
+      return 'Indisponible';
+    }
+    return item.status ? 'Disponible' : 'Indisponible';
   };
 
-  // Ajout de la colonne "ETAT" avec la fonction determineEtat
   const newData = filteredData.map(item => ({
     ...item,
     etat: determineEtat(item),
+    probleme: item.message || ''
   }));
 
   return (
@@ -80,7 +92,6 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
       <br />
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <div style={{ display: 'flex', gap: '40px' }}>
-
           <div>
             <CardComponent backgroundColor={backgroundColor || 'white'}>
               <div style={{ textAlign: 'center', marginBottom: '10px' }}>
@@ -100,16 +111,22 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
                 sx={{ bgcolor: 'white', borderRadius: 1 }}
                 onChange={e => setSearchTerm(e.target.value)}
               />
-              <TableComponent
-                data={newData} // Utiliser newData avec la colonne "ETAT" ajoutée
-                columns={columns}
-                cellStyle={{ padding: '12px 60px' }}
-                actionColumn={{
-                  label: 'Détails',
-                  onClick: handleIconClick,
-                  icon: <FaInfoCircle />,
-                }}
-              />
+              {loadingMainData ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <TableComponent
+                  data={newData}
+                  columns={columns}
+                  cellStyle={{ padding: '12px 60px' }}
+                  actionColumn={{
+                    label: 'Détails',
+                    onClick: handleIconClick,
+                    icon: <FaInfoCircle />,
+                  }}
+                />
+              )}
             </CardComponent>
           </div>
 
@@ -119,24 +136,29 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
                 <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                   <h2>Articles de la commande "{data[clickedRowIndex].DO_Piece}"</h2>
                 </div>
-                <TableComponent
-                  data={additionalData}
-                  columns={additionalColumns}
-                  cellStyle={{ padding: '12px 20px' }}
-                  actionColumn={{
-                    label: 'Détails',
-                    onClick: handleAdditionalIconClick,
-                    icon: <ArrowForwardIcon />,
-                  }}
-                />
+                {loadingAdditionalData ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px' }}>
+                    <CircularProgress color="primary" size={40} thickness={5} /> {/* Ajout de la taille et de l'épaisseur */}
+                  </Box>
+                ) : (
+                  <TableComponent
+                    data={additionalData}
+                    columns={additionalColumns}
+                    cellStyle={{ padding: '12px 20px' }}
+                    actionColumn={{
+                      label: 'Détails',
+                      onClick: handleAdditionalIconClick,
+                      icon: <ArrowForwardIcon />,
+                    }}
+                  />
+                )}
               </CardComponent>
             </div>
           )}
-
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default CommandesPages;

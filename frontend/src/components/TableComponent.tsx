@@ -1,4 +1,3 @@
-// src/components/TableComponent.tsx
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import MiniCardComponent from './MiniCardComponent'; // Import du composant MiniCardComponent
@@ -24,7 +23,7 @@ interface TableComponentProps {
 const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionColumn, cellStyle }) => {
 
   return (
-    <div style={{ overflowX: 'auto', paddingRight: '5px' }}> {/* Ajout de paddingRight */}
+    <div style={{ overflowX: 'auto', paddingRight: '5px' }}>
       <TableContainer component={Paper}>
         <Table>
           <TableHead style={{ backgroundColor: '#f5f5f5' }}> 
@@ -39,11 +38,13 @@ const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionCo
           </TableHead>
           <TableBody>
             {data.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <TableRow key={rowIndex} style={{ backgroundColor: row.backgroundColor || 'inherit' }}> {/* Ajout de la couleur de fond */}
                 {columns.map((column) => (
                   <TableCell key={column.id} style={{ ...cellStyle, textAlign: 'center' }}>
-                    {column.id === 'etat' ? ( // Si c'est la colonne "ETAT"
-                      <MiniCardComponent text={row[column.id]} /> // Utilise MiniCardComponent pour afficher le texte
+                    {column.id === 'etat' ? (
+                      <MiniCardComponent text={row[column.id]} />
+                    ) : column.id === 'probleme' ? (
+                      <strong>{row[column.id]}</strong> // Mettre en gras si c'est la colonne Problème
                     ) : (
                       row[column.id]
                     )}

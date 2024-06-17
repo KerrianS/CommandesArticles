@@ -13,7 +13,7 @@ const MiniCardComponent: React.FC<MiniCardComponentProps> = ({ text, backgroundC
       case 'Disponible':
         return '#32CD32';
       case 'Indisponible':
-        return '#8B0000';
+        return '#E50000';
       default:
         return 'white';
     }
@@ -22,7 +22,7 @@ const MiniCardComponent: React.FC<MiniCardComponentProps> = ({ text, backgroundC
   return (
     <Card sx={{ minWidth: 100, maxWidth: 100, marginRight: 1, borderRadius: 2, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: defaultBackgroundColor }}>
       <CardContent sx={{ padding: 0, ':last-child': { paddingBottom: 0 } }}>
-        <Typography variant="body2" color="text.primary" sx={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="white" sx={{ textAlign: 'center' }}>
           {text}
         </Typography>
       </CardContent>
