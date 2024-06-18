@@ -1,56 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TextField, InputAdornment, CircularProgress, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TableComponent from '../components/TableComponent';
 import CardComponent from '../components/CardComponent';
 import { useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useQuery } from 'react-query';
+
+interface Article {
+  AR_Ref: string;
+  AS_QteSto: number;
+  total_commande_vendu: number;
+  total_commande_acheter: number;
+}
 
 interface ArticlesPageProps {
   backgroundColor?: string;
 }
 
 const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
-  const [data, setData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [loadingMainData, setLoadingMainData] = useState<boolean>(true);
   const navigate = useNavigate();
 
   const columns = [
     { id: 'AR_Ref', label: 'Article' },
     { id: 'AS_QteSto', label: 'Stock' },
-    { id: 'total_commande', label: 'Total article commandé' },
-    { id: 'total_achete', label: 'Total article acheté' },
+    { id: 'total_commande_vendu', label: 'Total commandé (client)' },
+    { id: 'total_commande_acheter', label: 'Total acheté (fournisseur)' },
     { id: 'etat', label: 'État' },
   ];
 
-  useEffect(() => {
-    fetch('http://10.10.30.100:3031/articles')
-      .then(response => response.json())
-      .then(data => {
-        setData(data);
-        setLoadingMainData(false);
-      })
-      .catch(error => {
-        console.error('Error fetching main data:', error);
-        setLoadingMainData(false);
-      });
-  }, []);
-
-  const filteredData = data.filter(item =>
-    item.AR_Ref.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const determineEtat = (item: any): string => {
-    return item.AS_QteSto < item.total_commande ? 'RUPTURE' : 'EN STOCK';
+  const fetchArticles = async () => {
+    const response = await fetch('http://10.10.30.100:3031/articles');
+    if (!response.ok) {
+      throw new Error('Error fetching articles data');
+    }
+    return response.json();
   };
 
-  const newData = filteredData.map(item => ({
+  const { data, isLoading, error } = useQuery<Article[]>('articles', fetchArticles);
+
+  const filteredData = data?.filter(item =>
+    item.AR_Ref.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const determineEtat = (item: Article): string => {
+    if (item.total_commande_vendu > (item.AS_QteSto + item.total_commande_acheter)) {
+      return 'RUPTURE';
+    }
+    if (item.total_commande_vendu > item.AS_QteSto && (item.total_commande_acheter + item.AS_QteSto) >= item.total_commande_vendu) {
+      return 'EN COURS';
+    }
+    if (item.total_commande_vendu <= item.AS_QteSto) {
+      return 'EN STOCK';
+    }
+    return 'INCONNU';
+  };
+
+  const newData = filteredData.map((item: Article) => ({
     ...item,
     etat: determineEtat(item),
   }));
 
-  const handleAdditionalIconClick = (rowData: any) => {
+  const handleAdditionalIconClick = (rowData: Article) => {
     navigate(`/articles/${rowData.AR_Ref}`);
   };
 
@@ -78,9 +90,13 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
                 sx={{ bgcolor: 'white', borderRadius: 1 }}
                 onChange={e => setSearchTerm(e.target.value)}
               />
-              {loadingMainData ? (
+              {isLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                   <CircularProgress />
+                </Box>
+              ) : error ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px', color: 'red' }}>
+                  <p>Error loading data</p>
                 </Box>
               ) : (
                 <TableComponent

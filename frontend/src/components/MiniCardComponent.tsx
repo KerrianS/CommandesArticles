@@ -19,7 +19,9 @@ const MiniCardComponent: React.FC<MiniCardComponentProps> = ({ text, backgroundC
       case 'EN STOCK':
         return '#32CD32'; 
       case 'RUPTURE':
-        return '#E50000'; 
+        return '#E50000';
+      case 'EN COURS':
+        return '#ff8000';  
     }
   })();
 
