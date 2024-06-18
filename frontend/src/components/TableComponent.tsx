@@ -44,7 +44,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionCo
                     {column.id === 'etat' ? (
                       <MiniCardComponent text={row[column.id]} />
                     ) : column.id === 'probleme' ? (
-                      <strong>{row[column.id]}</strong> // Mettre en gras si c'est la colonne Problème
+                      <strong>{row[column.id]}</strong>
                     ) : (
                       row[column.id]
                     )}

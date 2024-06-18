@@ -1,125 +1,94 @@
 import React, { useEffect, useState } from 'react';
-import CardComponent from '../components/CardComponent';
+import { TextField, InputAdornment, CircularProgress, Box } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import TableComponent from '../components/TableComponent';
-import { useParams } from 'react-router-dom';
+import CardComponent from '../components/CardComponent';
+import { useNavigate } from 'react-router-dom';
 
 interface ArticlesPageProps {
   backgroundColor?: string;
 }
 
-const generateColor = (index: number) => {
-  const hue = (index * 137.508) % 360; // Utilisation d'une formule pour générer une couleur unique en fonction de l'index
-  return `hsl(${hue}, 70%, 80%)`;
-};
+const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
+  const [data, setData] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [loadingMainData, setLoadingMainData] = useState<boolean>(true);
+  const navigate = useNavigate();
 
-const ArticlesPages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
-  const { id } = useParams(); 
-  const [data, setData] = useState<any>({});
-  const [levelOne, setLevelOne] = useState<any[]>([]); 
-  const [levelTwo, setLevelTwo] = useState<any[]>([]); 
-  const [levelThree, setLevelThree] = useState<any[]>([]); 
+  const columns = [
+    { id: 'AR_Ref', label: 'Article' },
+    { id: 'AS_QteSto', label: 'Stock' },
+    { id: 'total_commande', label: 'Total article commandé' },
+    { id: 'etat', label: 'État' },
+  ];
 
   useEffect(() => {
-    fetch(`http://10.15.81.2:3039/article/${id}`)
+    fetch('http://10.10.30.100:3031/articles')
       .then(response => response.json())
       .then(data => {
         setData(data);
-        if (Array.isArray(data.level_one)) {
-          setLevelOne(data.level_one);
-        } else if (data.level_one) {
-          setLevelOne([data.level_one]);
-        }
-        if (Array.isArray(data.level_two)) {
-          setLevelTwo(data.level_two);
-        } else if (data.level_two) {
-          setLevelTwo([data.level_two]);
-        }
-        if (Array.isArray(data.level_three)) {
-          setLevelThree(data.level_three);
-        } else if (data.level_three) {
-          setLevelThree([data.level_three]);
-        }
+        setLoadingMainData(false);
       })
-      .catch(error => console.error('Error fetching data:', error));
-  }, [id]);
+      .catch(error => {
+        console.error('Error fetching main data:', error);
+        setLoadingMainData(false);
+      });
+  }, []);
 
-  const columns = [
-    { id: 'composant', label: 'Composant' },
-    { id: 'quantity', label: 'Quantité' },
-    { id: 'stock', label: 'Stock' },
-    { id: 'composant_parent', label: 'Composant Parent', isVisible: false }
-  ];
+  const filteredData = data.filter(item =>
+    item.AR_Ref.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const defaultQuantity = 0;
-  const defaultStock = 0;
-
-  // Stocker les couleurs des composants parents dans un objet
-  const parentColors: { [key: string]: string } = {};
-
-  // Fonction pour récupérer ou générer une couleur pour un composant parent
-  const getColorForParent = (parent: string) => {
-    if (!parentColors[parent]) {
-      const index = Object.keys(parentColors).length + 1; // Obtenir un index unique pour chaque composant parent
-      parentColors[parent] = generateColor(index);
-    }
-    return parentColors[parent];
+  const determineEtat = (item: any): string => {
+    return item.AS_QteSto < item.total_commande ? 'RUPTURE' : 'EN STOCK';
   };
+
+  const newData = filteredData.map(item => ({
+    ...item,
+    etat: determineEtat(item),
+  }));
 
   return (
     <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh', padding: '20px', boxSizing: 'border-box' }}>
       <br />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', columnGap: '20px' }}>
-        <div>
-          <CardComponent>
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <h2>Niveau 1</h2>
-            </div>
-            <TableComponent 
-              data={levelOne.map(item => ({
-                ...item,
-                quantity: item.quantity || defaultQuantity,
-                stock: item.stock || defaultStock,
-                backgroundColor: getColorForParent(item.composant)
-              }))} 
-              columns={columns.slice(0, 3)} 
-            />
-          </CardComponent>
-        </div>
-        <div>
-          <CardComponent>
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <h2>Niveau 2</h2>
-            </div>
-            <TableComponent 
-              data={levelTwo.map(item => ({
-                ...item,
-                quantity: item.quantity || defaultQuantity,
-                stock: item.stock || defaultStock,
-                backgroundColor: getColorForParent(item.composant_parent)
-              }))} 
-              columns={columns} 
-            />
-          </CardComponent>
-        </div>
-        <div>
-          <CardComponent>
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-              <h2>Niveau 3</h2>
-            </div>
-            <TableComponent 
-              data={levelThree.map(item => ({
-                ...item,
-                quantity: item.quantity || defaultQuantity,
-                stock: item.stock || defaultStock,
-                backgroundColor: getColorForParent(item.composant_parent)
-              }))} 
-              columns={columns} 
-            />
-          </CardComponent>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '40px' }}>
+          <div>
+            <CardComponent backgroundColor={backgroundColor || 'white'}>
+              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                <h2>Tableau des articles</h2>
+              </div>
+              <TextField
+                variant="outlined"
+                placeholder="Recherche (N° article)"
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ bgcolor: 'white', borderRadius: 1 }}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              {loadingMainData ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <TableComponent
+                  data={newData}
+                  columns={columns}
+                  cellStyle={{ padding: '12px 60px' }}
+                />
+              )}
+            </CardComponent>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default ArticlesPages;
+export default ArticlesPage;

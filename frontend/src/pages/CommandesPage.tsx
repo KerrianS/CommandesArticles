@@ -35,7 +35,6 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
   ];
 
   useEffect(() => {
-    // Fetch main data
     fetch('http://10.15.81.2:3039/commande/etat')
       .then(response => response.json())
       .then(data => {
@@ -53,7 +52,7 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
     setClickedRowIndex(rowIndex);
     setLoadingAdditionalData(true); // Afficher le loader pendant la récupération des données supplémentaires
 
-    fetch(`http://10.15.81.2:3039/commande/${rowData.DO_Piece}`)
+    fetch(`http://10.10.30.100:3031/commande/${rowData.DO_Piece}`)
       .then(response => response.json())
       .then(data => {
         setAdditionalData(data);

@@ -35,7 +35,15 @@ function HeaderComponent() {
             </IconButton>
 
             <Box sx={{ ml: 3 }}>
-              <Button sx={{ color: 'white', display: 'block' }}>Commandes</Button>
+              <Link to="/commandes" style={{ textDecoration: 'none' }}>
+                <Button sx={{ color: 'white', display: 'block' }}>Commandes</Button>
+              </Link>
+            </Box>
+
+            <Box sx={{ ml: 3 }}>
+              <Link to="/articles" style={{ textDecoration: 'none' }}>
+                <Button sx={{ color: 'white', display: 'block' }}>Articles</Button>
+              </Link>
             </Box>
             
           </Box>
