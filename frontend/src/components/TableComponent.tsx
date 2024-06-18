@@ -38,7 +38,7 @@ const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionCo
           </TableHead>
           <TableBody>
             {data.map((row, rowIndex) => (
-              <TableRow key={rowIndex} style={{ backgroundColor: row.backgroundColor || 'inherit' }}> {/* Ajout de la couleur de fond */}
+              <TableRow key={rowIndex} style={{ backgroundColor: row.backgroundColor || 'inherit' }}> 
                 {columns.map((column) => (
                   <TableCell key={column.id} style={{ ...cellStyle, textAlign: 'center' }}>
                     {column.id === 'etat' ? (

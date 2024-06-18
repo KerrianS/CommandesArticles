@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TableComponent from '../components/TableComponent';
 import CardComponent from '../components/CardComponent';
 import { useNavigate } from 'react-router-dom';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 interface ArticlesPageProps {
   backgroundColor?: string;
@@ -19,6 +20,7 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
     { id: 'AR_Ref', label: 'Article' },
     { id: 'AS_QteSto', label: 'Stock' },
     { id: 'total_commande', label: 'Total article commandé' },
+    { id: 'total_achete', label: 'Total article acheté' },
     { id: 'etat', label: 'État' },
   ];
 
@@ -47,6 +49,10 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
     ...item,
     etat: determineEtat(item),
   }));
+
+  const handleAdditionalIconClick = (rowData: any) => {
+    navigate(`/articles/${rowData.AR_Ref}`);
+  };
 
   return (
     <div style={{ backgroundColor: '#f0f0f0', minHeight: '100vh', padding: '20px', boxSizing: 'border-box' }}>
@@ -81,6 +87,11 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
                   data={newData}
                   columns={columns}
                   cellStyle={{ padding: '12px 60px' }}
+                  actionColumn={{
+                    label: 'Nomenclature',
+                    onClick: handleAdditionalIconClick,
+                    icon: <ArrowForwardIcon />,
+                  }}
                 />
               )}
             </CardComponent>

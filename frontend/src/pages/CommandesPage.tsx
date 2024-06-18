@@ -35,7 +35,7 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
   ];
 
   useEffect(() => {
-    fetch('http://10.15.81.2:3039/commande/etat')
+    fetch('http://10.10.30.100:3031/commande/etat')
       .then(response => response.json())
       .then(data => {
         setData(data);
@@ -137,7 +137,7 @@ const CommandesPages: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
                 </div>
                 {loadingAdditionalData ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px' }}>
-                    <CircularProgress color="primary" size={40} thickness={5} /> {/* Ajout de la taille et de l'épaisseur */}
+                    <CircularProgress color="primary" size={40} thickness={5} />
                   </Box>
                 ) : (
                   <TableComponent
