@@ -15,11 +15,11 @@ const generateColor = (index: number) => {
 
 const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [data, setData] = useState<any>({});
-  const [levelOne, setLevelOne] = useState<any[]>([]); 
-  const [levelTwo, setLevelTwo] = useState<any[]>([]); 
-  const [levelThree, setLevelThree] = useState<any[]>([]); 
+  const [levelOne, setLevelOne] = useState<any[]>([]);
+  const [levelTwo, setLevelTwo] = useState<any[]>([]);
+  const [levelThree, setLevelThree] = useState<any[]>([]);
 
   useEffect(() => {
     fetch(`http://10.10.30.100:3031/article/${id}`)
@@ -46,15 +46,16 @@ const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) 
   }, [id]);
 
   const columns = [
-    { id: 'composant', label: 'Composant' },
-    { id: 'quantity', label: 'Quantité' },
-    { id: 'stock', label: 'Stock' },
-    { id: 'composant_parent', label: 'Composant Parent', isVisible: false }
+    { id: 'composant', label: 'Composant', width: '15%' },
+    { id: 'quantity', label: 'Quantité', width: '15%' },
+    { id: 'stock', label: 'Stock', width: '15%' },
+    { id: 'total_commande_vendu', label: 'Total commandé (client)', width: '80%' },
+    { id: 'total_commande_acheter', label: 'Total acheté (fournisseur)', width: '20%' },
+    { id: 'composant_parent', label: 'Composant Parent', isVisible: false, width: '15%' }
   ];
 
   const defaultQuantity = 0;
   const defaultStock = 0;
-
   const parentColors: { [key: string]: string } = {};
 
   const getColorForParent = (parent: string) => {
@@ -86,9 +87,11 @@ const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) 
                 ...item,
                 quantity: item.quantity || defaultQuantity,
                 stock: item.stock || defaultStock,
+                total_commande_vendu: item.total_commande_vendu,
+                total_commande_acheter: item.total_commande_acheter,
                 backgroundColor: getColorForParent(item.composant)
               }))} 
-              columns={columns.slice(0, 3)} 
+              columns={columns.slice(0, 5)} 
             />
           </CardComponent>
         </div>
@@ -102,9 +105,11 @@ const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) 
                 ...item,
                 quantity: item.quantity || defaultQuantity,
                 stock: item.stock || defaultStock,
+                total_commande_vendu: item.total_commande_vendu,
+                total_commande_acheter: item.total_commande_acheter,
                 backgroundColor: getColorForParent(item.composant_parent)
               }))} 
-              columns={columns} 
+              columns={columns.slice(0, 6)} 
             />
           </CardComponent>
         </div>
@@ -118,9 +123,11 @@ const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) 
                 ...item,
                 quantity: item.quantity || defaultQuantity,
                 stock: item.stock || defaultStock,
+                total_commande_vendu: item.total_commande_vendu,
+                total_commande_acheter: item.total_commande_acheter,
                 backgroundColor: getColorForParent(item.composant_parent)
               }))} 
-              columns={columns} 
+              columns={columns.slice(0, 6)} 
             />
           </CardComponent>
         </div>

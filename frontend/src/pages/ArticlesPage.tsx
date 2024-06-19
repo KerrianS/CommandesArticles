@@ -6,12 +6,14 @@ import CardComponent from '../components/CardComponent';
 import { useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useQuery } from 'react-query';
+import MiniCardComponent from '../components/MiniCardComponent';
 
 interface Article {
   AR_Ref: string;
   AS_QteSto: number;
   total_commande_vendu: number;
   total_commande_acheter: number;
+  fabricable: number;
 }
 
 interface ArticlesPageProps {
@@ -24,10 +26,12 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
 
   const columns = [
     { id: 'AR_Ref', label: 'Article' },
+    { id: 'total_commande_vendu', label: 'Commande client' },
     { id: 'AS_QteSto', label: 'Stock' },
-    { id: 'total_commande_vendu', label: 'Total commandé (client)' },
-    { id: 'total_commande_acheter', label: 'Total acheté (fournisseur)' },
+    { id: 'total_commande_acheter', label: 'Commande fournisseur' },
     { id: 'etat', label: 'État' },
+    { id: 'fabricable', label: 'Quantité à fabriquer' },
+    { id: 'etatFabricable', label: 'Fabricable' },
   ];
 
   const fetchArticles = async () => {
@@ -39,7 +43,6 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
   };
 
   const { data, isLoading, error } = useQuery<Article[]>('articles', fetchArticles);
-
   const filteredData = data?.filter(item =>
     item.AR_Ref.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
@@ -57,9 +60,18 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
     return 'INCONNU';
   };
 
+  const determineFabricable = (item: Article): string => {
+    if (item.fabricable > 0) {
+      return "FABRICABLE";
+    } else {
+      return "INFABRICABLE";
+    }
+  }
+
   const newData = filteredData.map((item: Article) => ({
     ...item,
     etat: determineEtat(item),
+    etatFabricable: determineFabricable(item),
   }));
 
   const handleAdditionalIconClick = (rowData: Article) => {
