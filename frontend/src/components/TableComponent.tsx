@@ -59,9 +59,9 @@ const TableComponent: React.FC<TableComponentProps> = ({ data, columns, actionCo
                       width: column.width,
                       padding: compact ? '4px' : '8px'
                     }}>
-                    {column.id === 'etat' || column.id === 'etatFabricable' ? (
+                    {column.id === 'etat' || column.id === 'etatFabricable' || column.id === 'etatLivraison' ? (
                       <MiniCardComponent text={row[column.id]} />
-                    ) : column.id === 'probleme' ? (
+                    ) : column.id === 'probleme' || column.id === 'DO_DateLivr' ? (
                       <strong>{row[column.id]}</strong>
                     ) : (
                       row[column.id]

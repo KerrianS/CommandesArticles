@@ -22,7 +22,7 @@ const DetailsCommandePages: React.FC<ArticlesPageProps> = ({ backgroundColor }) 
   const [levelThree, setLevelThree] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch(`http://10.10.30.100:3031/article/${id}`)
+    fetch(`http://10.15.81.2:3031/article/${id}`)
       .then(response => response.json())
       .then(data => {
         setData(data);

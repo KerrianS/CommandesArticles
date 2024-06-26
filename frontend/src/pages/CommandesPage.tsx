@@ -7,6 +7,7 @@ import { FaInfoCircle } from 'react-icons/fa';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import dayjs from 'dayjs';
 
 interface CommandesPagesProps {
   backgroundColor?: string;
@@ -19,7 +20,7 @@ const CommandesPage: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
   const navigate = useNavigate();
 
   const fetchMainData = async () => {
-    const response = await fetch('http://10.10.30.100:3031/commande/etat');
+    const response = await fetch('http://10.15.81.2:3031/commande/etat');
     if (!response.ok) {
       throw new Error('Error fetching main data');
     }
@@ -29,7 +30,7 @@ const CommandesPage: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
   const { data: mainData, isLoading: loadingMainData } = useQuery('mainData', fetchMainData);
 
   const fetchAdditionalData = async (DO_Piece: string) => {
-    const response = await fetch(`http://10.10.30.100:3031/commande/${DO_Piece}`);
+    const response = await fetch(`http://10.15.81.2:3031/commande/${DO_Piece}`);
     if (!response.ok) {
       throw new Error('Error fetching additional data');
     }
@@ -48,8 +49,10 @@ const CommandesPage: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
     { id: 'etat', label: 'Etat' },
     { id: 'DO_Piece', label: 'N° de commande' },
     { id: 'DO_Ref', label: 'Référence' },
+    { id: 'DO_DateLivr', label: 'Date de livraison' },
+    { id: 'etatLivraison', label: 'Livraison' },
     { id: 'DO_Tiers', label: 'Tiers' },
-    { id: 'probleme', label: 'Problème', render: (row: any) => <strong>{row.probleme}</strong> }
+    { id: 'probleme', label: 'Problème'}
   ];
 
   const additionalColumns = [
@@ -81,8 +84,16 @@ const CommandesPage: React.FC<CommandesPagesProps> = ({ backgroundColor }) => {
     return item.status ? 'Disponible' : 'Indisponible';
   };
 
+  const determineEtatLivraison = (item: any): string => {
+    const deliveryDate = dayjs(item.DO_DateLivr);
+    const today = dayjs();
+    return deliveryDate.isAfter(today) ? 'NON LIVRE' : 'LIVRE';
+  };
+
   const newData = filteredData.map((item: any) => ({
     ...item,
+    DO_DateLivr: dayjs(item.DO_DateLivr).format('DD/MM/YYYY'), 
+    etatLivraison: determineEtatLivraison(item),
     etat: determineEtat(item),
     probleme: item.message || ''
   }));

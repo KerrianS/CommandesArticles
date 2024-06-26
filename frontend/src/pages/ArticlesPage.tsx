@@ -6,7 +6,6 @@ import CardComponent from '../components/CardComponent';
 import { useNavigate } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useQuery } from 'react-query';
-import MiniCardComponent from '../components/MiniCardComponent';
 
 interface Article {
   AR_Ref: string;
@@ -30,12 +29,12 @@ const ArticlesPage: React.FC<ArticlesPageProps> = ({ backgroundColor }) => {
     { id: 'AS_QteSto', label: 'Stock' },
     { id: 'total_commande_acheter', label: 'Commande fournisseur' },
     { id: 'etat', label: 'État' },
-    { id: 'fabricable', label: 'Quantité à fabriquer' },
-    { id: 'etatFabricable', label: 'Fabricable' },
+    { id: 'fabricable', label: 'Quantité fabricable' },
+    { id: 'etatFabricable', label: 'Composant' },
   ];
 
   const fetchArticles = async () => {
-    const response = await fetch('http://10.10.30.100:3031/articles');
+    const response = await fetch('http://10.15.81.2:3031/articles');
     if (!response.ok) {
       throw new Error('Error fetching articles data');
     }

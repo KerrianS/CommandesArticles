@@ -23,6 +23,10 @@ const MiniCardComponent: React.FC<MiniCardComponentProps> = ({ text, backgroundC
         return '#9ACD32';
       case 'INFABRICABLE':
         return '#ff8000';
+      case 'LIVRE':
+        return '#65c368';
+      case 'NON LIVRE':
+        return '#ff8000';
       default:
         return 'white';
     }
